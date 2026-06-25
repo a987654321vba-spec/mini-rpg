@@ -38,34 +38,33 @@
             color: #aaa; cursor: pointer; display: flex; flex-direction: column; align-items: center;
         }
         .nav-btn.active { color: var(--secondary); }
-        .nav-icon { width: 24px; height: 24px; margin-bottom: 3px; fill: currentColor; }
 
         .btn { background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .card { background: #fefefe; border: 2px solid #f0f0f0; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
-        .input-group { margin-bottom: 12px; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
+        .input-group { margin-bottom: 12px; display: flex; gap: 5px; }
+        input, select { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
         
-        .char-display { width: 120px; height: 120px; margin: 15px auto; background: #fafafa; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 4px dashed var(--primary); overflow: hidden; }
-        .char-img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        /* ① 로비 캐릭터 이미지 영역 */
+        .char-display { width: 130px; height: 130px; margin: 15px auto; background: #fafafa; border-radius: 16px; display: flex; justify-content: center; align-items: center; border: 3px dashed var(--primary); overflow: hidden; }
+        .char-img { max-width: 95%; max-height: 95%; object-fit: contain; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #eee; }
-        th { background-color: #fff3cd; color: var(--secondary); font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #fff3cd; color: var(--secondary); font-weight: bold; }
 
+        /* ④ 강화 서브 탭 스타일 */
         .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; }
-        .sub-btn { flex: 1; padding: 8px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; }
+        .sub-btn { flex: 1; padding: 10px 5px; font-size: 0.8rem; font-weight: bold; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; }
         .sub-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 모바일 액션 레이아웃 및 터치 방지 가상패드 */
+        /* ② 전투 화면 및 모바일 패드 레이아웃 */
         #canvas-container { position: relative; width: 100%; background: #111; border-radius: 12px; overflow: hidden; display: none; margin-top: 10px; }
         canvas { display: block; background: #223344; width: 100%; height: auto; }
-        
         .mobile-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px; background: #f1f1f1; border-radius: 12px; margin-top: 10px; }
         .pad-btn { 
             background: #ffffff; border: 2px solid #ddd; font-weight: bold; border-radius: 12px; font-size: 1.2rem; height: 55px;
-            display: flex; justify-content: center; align-items: center; cursor: pointer;
-            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+            display: flex; justify-content: center; align-items: center; cursor: pointer; user-select: none; -webkit-user-select: none;
         }
         .pad-btn:active { background: #e0e0e0; }
         .pad-attack { background: var(--accent) !important; color: white; border-color: var(--accent); }
@@ -77,97 +76,95 @@
     <header id="game-title">미니 어드벤처 RPG</header>
     
     <div class="content-area">
+        <!-- 로그인 페이지 -->
         <div id="page-auth" class="page active">
             <div class="card">
                 <h3 style="margin-bottom:15px; text-align:center;">모험가 인증</h3>
                 <div class="input-group"><input type="text" id="auth-id" placeholder="아이디" value="test"></div>
                 <div class="input-group"><input type="password" id="auth-pw" placeholder="비밀번호" value="test"></div>
-                <div class="input-group"><input type="text" id="auth-nick" placeholder="닉네임 (회원가입 전용)" value="키리토"></div>
-                <button class="btn" onclick="game.register()">회원가입</button>
-                <button class="btn" style="background:#42b883;" onclick="game.login()">로그인</button>
+                <div class="input-group"><input type="text" id="auth-nick" placeholder="닉네임(신규가입용)" value="마검사무쌍"></div>
+                <button class="btn" style="background:#42b883;" onclick="game.login()">로그인 및 시작</button>
             </div>
         </div>
 
+        <!-- 직업 선택 페이지 -->
         <div id="page-job-select" class="page">
             <div class="card" style="text-align: center;">
                 <h3>클래스 전직 선택</h3>
-                <p style="font-size:0.85rem; color:#888; margin: 8px 0;">40레벨에 궁극의 2차 전직이 가능합니다.</p>
-                
+                <p style="font-size:0.85rem; color:#888; margin: 8px 0;">사진 파일 이름 규칙과 매칭되는 직업을 고르세요!</p>
                 <div class="card" style="border-color: #ff4d4d; cursor:pointer;" onclick="game.selectJob('성기사')">
-                    <strong>성기사 (1차)</strong><br><small>강력한 물리 공격력 특화</small>
+                    <strong>성기사 (1차)</strong><br><small>player_성기사_1st_idle.png.jpg 연동</small>
                 </div>
                 <div class="card" style="border-color: #9b5de5; cursor:pointer;" onclick="game.selectJob('사령술사')">
-                    <strong>사령술사 (1차)</strong><br><small>치명적인 암흑 마력 특화</small>
+                    <strong>사령술사 (1차)</strong><br><small>player_사령술사_1st_idle.png.jpg 연동</small>
                 </div>
                 <div class="card" style="border-color: #00bbf9; cursor:pointer;" onclick="game.selectJob('마검사')">
-                    <strong>마검사 (1차)</strong><br><small>공격과 마법의 완벽한 밸런스</small>
+                    <strong>마검사 (1차)</strong><br><small>player_마검사_1st_idle.png.jpg 연동</small>
                 </div>
             </div>
         </div>
 
+        <!-- ① 로비 페이지 -->
         <div id="page-lobby" class="page">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span id="lobby-nick" style="font-weight:bold; font-size:1.2rem;">닉네임</span>
-                    <button onclick="game.logout()" style="background:none; border:none; color:red; cursor:pointer;">로그아웃</button>
+                    <button class="btn" style="margin:0; width:auto; padding:5px 10px; background:#aaa; font-size:0.8rem;" onclick="game.logout()">로그아웃</button>
                 </div>
-                <p id="lobby-job" style="color:var(--secondary); font-weight:bold; margin-top:5px;">직업 상태</p>
+                <p id="lobby-job" style="color:var(--secondary); font-weight:bold; margin-top:5px;">직업</p>
                 
                 <div class="char-display">
-                    <img id="player-sprite" class="char-img" src="" alt="캐릭터">
+                    <img id="player-sprite" class="char-img" src="" alt="캐릭터 외형">
                 </div>
 
-                <div style="margin-top:15px; font-size: 0.9rem;">
-                    <div>🎯 <b>레벨:</b> <span id="lobby-level">1</span> (최대 70)</div>
+                <div style="margin-top:15px; font-size: 0.9rem; line-height:1.6;">
+                    <div>🎯 <b>레벨:</b> <span id="lobby-level">1</span> (40레벨 돌파 시 2nd 외형 자동 적용)</div>
                     <div>✨ <b>경험치:</b> <span id="lobby-exp">0</span> / <span id="lobby-next-exp">100</span></div>
-                    <div>💰 <b>보유 골드:</b> <span id="lobby-gold">0</span> G</div>
+                    <div>💰 <b>보유 재화:</b> <span id="lobby-gold">0</span> G</div>
                 </div>
             </div>
 
             <div class="card">
-                <h4>보유 스탯 <span id="lobby-points" style="color:red; float:right;">포인트: 0</span></h4>
-                <table style="font-size:0.85rem;">
-                    <tr><td>속도 (최대 80)</td><td><span id="stat-speed">0</span></td><td><button onclick="game.addStat('speed')">+</button></td></tr>
-                    <tr><td>체력 (최대 80)</td><td><span id="stat-hp">0</span></td><td><button onclick="game.addStat('hp')">+</button></td></tr>
-                    <tr><td>공격 (최대 80)</td><td><span id="stat-atk">0</span></td><td><button onclick="game.addStat('atk')">+</button></td></tr>
-                    <tr><td>마력 (최대 80)</td><td><span id="stat-magic">0</span></td><td><button onclick="game.addStat('magic')">+</button></td></tr>
+                <h4>보유 스탯 및 포인트 <span id="lobby-points" style="color:red; float:right;">0</span></h4>
+                <table>
+                    <tr><td>속도</td><td><span id="stat-speed">0</span></td><td><button onclick="game.addStat('speed')">+</button></td></tr>
+                    <tr><td>체력</td><td><span id="stat-hp">0</span></td><td><button onclick="game.addStat('hp')">+</button></td></tr>
+                    <tr><td>공격력</td><td><span id="stat-atk">0</span></td><td><button onclick="game.addStat('atk')">+</button></td></tr>
+                    <tr><td>마력</td><td><span id="stat-magic">0</span></td><td><button onclick="game.addStat('magic')">+</button></td></tr>
                 </table>
             </div>
+            <button class="btn" style="background:#4a4a4a;" onclick="game.cheatLevelUp()">개발자 테스트: 레벨 +40 (2nd 이미지 확인용)</button>
         </div>
 
+        <!-- ② 전투 페이지 -->
         <div id="page-battle" class="page">
             <div id="battle-setup">
                 <div class="card">
-                    <h4>일반 스테이지 보스전</h4>
-                    <p style="font-size:0.8rem; color:#777; margin-bottom:10px;">스펙을 높이지 않으면 고단계를 통과할 수 없습니다!</p>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <select id="boss-stage-select" style="flex:1; padding:8px; border-radius:8px;"></select>
-                        <button class="btn" style="margin:0; width:80px;" onclick="game.prepareActionBattle('boss')">도전</button>
+                    <h4>😈 일반 보스전 (1~30단계)</h4>
+                    <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">단계별로 보상이 대폭 상승합니다.</p>
+                    <div style="display:flex; gap:10px;">
+                        <select id="boss-stage-select"></select>
+                        <button class="btn" style="margin:0; width:90px;" onclick="game.prepareActionBattle('boss')">도전</button>
                     </div>
                 </div>
                 
                 <div class="card">
-                    <h4>친구 협동 레이드 보스</h4>
-                    <div class="card" style="background:#fff3f3; margin-top:10px;">
-                        <strong>😈 레이드 보스 [하 난이도]</strong>
-                        <button class="btn" style="background:var(--accent);" onclick="game.prepareActionBattle('raid', 'low')">레이드 입장</button>
+                    <h4>🤝 친구 협동 레이드전</h4>
+                    <div class="card" style="background:#fff3f3; margin-top:5px; padding:10px;">
+                        <strong>레이드 보스 [난이도 하]</strong><br><small>기본 보상이 지급됩니다.</small>
+                        <button class="btn" style="background:var(--accent); padding:6px;" onclick="game.prepareActionBattle('raid', 'low')">입장</button>
                     </div>
-                    <div class="card" style="background:#f3e8ff;">
-                        <strong>🔥 레이드 보스 [상 난이도] <small style="color:red;">(보상 3배!)</small></strong>
-                        <button class="btn" style="background:#9b5de5;" onclick="game.prepareActionBattle('raid', 'high')">레이드 입장</button>
+                    <div class="card" style="background:#f3e8ff; margin-top:5px; padding:10px;">
+                        <strong>레이드 보스 [난이도 상] <span style="color:red;">(3배 보상!)</span></strong><br><small>대량의 골드와 경험치 지급!</small>
+                        <button class="btn" style="background:#9b5de5; padding:6px;" onclick="game.prepareActionBattle('raid', 'high')">입장</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 모바일 전용 가상 패드가 내장된 스크린 -->
+            <!-- 실시간 액션 인게임 화면 -->
             <div id="canvas-container">
-                <div style="padding: 8px 10px; color: white; display: flex; justify-content: space-between; font-size: 0.8rem;">
-                    <span id="game-stage-title">보스 배틀</span>
-                    <span style="color: #ffbd59;" id="game-debug-info">체력/공격력 적용완료</span>
-                </div>
                 <canvas id="gameCanvas" width="400" height="220"></canvas>
-                
-                <!-- 모바일 전용 가상 터치패드 -->
+                <!-- 모바일 전용 방향키 및 공격/점프 패드 -->
                 <div class="mobile-pad">
                     <div class="pad-btn" id="btn-left">◀</div>
                     <div class="pad-btn" id="btn-right">▶</div>
@@ -178,13 +175,78 @@
             </div>
         </div>
 
-        <!-- 이하 페이지 생략 (기존 구조 동일하게 유지) -->
-        <div id="page-shop" class="page"><div class="card"><h4>귀여운 펫 분양소 (각 500G)</h4></div></div>
-        <div id="page-upgrade" class="page"><div class="card"><h3>캐릭터 능력 강화</h3><p>현재 강화 레벨: <span id="upgrade-level-val">0</span> / 5</p><button class="btn" onclick="game.executeUpgrade()">강화 시도</button></div></div>
-        <div id="page-friends" class="page"><div class="card"><h4>내 친구 목록</h4></div></div>
-        <div id="page-ranking" class="page"><div class="card"><h4>서버 명예의 전당 (Top 10)</h4><table><tbody id="ranking-table-body"></tbody></table></div></div>
+        <!-- ③ 상점 페이지 -->
+        <div id="page-shop" class="page">
+            <div class="card">
+                <h4>🐷 펫 분양 (각 500 G)</h4>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn" style="background:#ffb8b8;" onclick="game.buyPet('돼지')">돼지 분양</button>
+                    <button class="btn" style="background:#b8e9ff; color:#333;" onclick="game.buyPet('새')">새 분양</button>
+                </div>
+                <div style="margin-top:8px; font-size:0.85rem; color:#666;">보유 펫: <span id="shop-owned-pets">없음</span></div>
+            </div>
+            <div class="card">
+                <h4>⚔️ 능력치 업 장비 아이템 구매</h4>
+                <table style="text-align:left;">
+                    <tr><td>신발 (속도 +5)</td><td>300G</td><td><button onclick="game.buyItem('shoes', 300)">구매</button></td></tr>
+                    <tr><td>갑옷 (체력 +50)</td><td>400G</td><td><button onclick="game.buyItem('armor', 400)">구매</button></td></tr>
+                    <tr><td>무기 (공격 +10)</td><td>500G</td><td><button onclick="game.buyItem('weapon', 500)">구매</button></td></tr>
+                    <tr><td>반지 (마력 +10)</td><td>500G</td><td><button onclick="game.buyItem('ring', 500)">구매</button></td></tr>
+                </table>
+                <div style="margin-top:10px; font-size:0.85rem; color:#555;">보유 장비: <span id="shop-owned-items">없음</span></div>
+            </div>
+        </div>
+
+        <!-- ④ 강화 페이지 (3개 서브 탭 완벽 구동) -->
+        <div id="page-upgrade" class="page">
+            <div class="sub-nav">
+                <button class="sub-btn active" id="sub-tab-char" onclick="game.switchSubUpgrade('char')">캐릭터 강화</button>
+                <button class="sub-btn" id="sub-tab-item" onclick="game.switchSubUpgrade('item')">아이템 강화</button>
+                <button class="sub-btn" id="sub-tab-pet" onclick="game.switchSubUpgrade('pet')">펫 강화</button>
+            </div>
+
+            <div class="card" style="text-align:center;">
+                <h4 id="upgrade-title">캐릭터 능력치 강화</h4>
+                <p style="margin:15px 0; font-size:1.1rem;">현재 강화 단계: <strong id="upgrade-level-val" style="color:red;">0</strong> / 5 강</p>
+                <p style="font-size:0.85rem; color:#777; margin-bottom:10px;" id="upgrade-info">다음 강화 확률: 100% (비용: 200G)</p>
+                <button class="btn" onclick="game.executeUpgrade()">강화 시도하기</button>
+                <button class="btn" style="background:#95a5a6; margin-top:5px; font-size:0.8rem; padding:5px;" id="reset-stat-btn" onclick="game.resetCharacterStats()">캐릭터 스탯 초기화 (100G)</button>
+            </div>
+        </div>
+
+        <!-- ⑤ 친구 페이지 -->
+        <div id="page-friends" class="page">
+            <div class="card">
+                <h4>🔍 친구 ID 추가</h4>
+                <div class="input-group" style="margin-top:10px;">
+                    <input type="text" id="friend-search-id" placeholder="친구의 아이디 입력">
+                    <button class="btn" style="margin:0; width:70px;" onclick="game.addFriend()">요청</button>
+                </div>
+            </div>
+            <div class="card">
+                <h4>👥 내 친구 목록</h4>
+                <table>
+                    <thead><tr><th>닉네임</th><th>레벨</th></tr></thead>
+                    <tbody id="friend-table-body">
+                        <tr><td colspan="2" style="color:#aaa;">등록된 친구가 없습니다.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ⑥ 랭킹 페이지 -->
+        <div id="page-ranking" class="page">
+            <div class="card">
+                <h4>🏆 전 서버 통합 TOP 10 랭킹</h4>
+                <table>
+                    <thead><tr><th>순위</th><th>닉네임</th><th>직업</th><th>레벨</th></tr></thead>
+                    <tbody id="ranking-table-body"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
+    <!-- 네비게이션 탭 바 -->
     <nav id="main-nav" style="display:none;">
         <button class="nav-btn active" onclick="game.switchTab('lobby', this)">로비</button>
         <button class="nav-btn" onclick="game.switchTab('battle', this)">전투</button>
@@ -199,18 +261,16 @@
     class GameEngine {
         constructor() {
             this.user = null;
-            this.currentUpgradeTab = 'char';
-            this.initBattleStages();
-            
+            this.currentUpgradeTab = 'char'; // 기본 강화 서브탭
             this.canvas = document.getElementById('gameCanvas');
             this.ctx = this.canvas.getContext('2d');
             this.gameState = 'idle';
             this.gameLoopId = null;
             
             this.keys = { left: false, right: false };
-            this.playerImg = new Image(); // 실시간 연동 캐릭터 이미지 객체
+            this.playerImg = new Image(); // 실시간 연동용 전용 이미지 객체
             
-            this.initInputListeners();
+            this.initBattleStages();
             this.initMobileTouchControls();
         }
 
@@ -218,16 +278,14 @@
             const select = document.getElementById('boss-stage-select');
             for(let i=1; i<=30; i++) {
                 let opt = document.createElement('option');
-                opt.value = i; opt.innerText = `보스 스테이지 ${i}단계`;
+                opt.value = i; opt.innerText = `${i}단계 보스 배틀`;
                 select.appendChild(opt);
             }
         }
 
-        // 이미지 경로를 동적으로 반환해주는 헬퍼 메소드
         getCharacterImagePath() {
             if (!this.user || !this.user.character.job) return '';
             const tier = this.user.character.level >= 40 ? '2nd' : '1st';
-            // 이미지에서 제공된 규칙대로 확장자 세팅 (.png.jpg)
             return `player_${this.user.character.job}_${tier}_idle.png.jpg`;
         }
 
@@ -237,18 +295,27 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`page-${pageId}`).classList.add('active');
             if(btnElement) btnElement.classList.add('active');
+            
+            this.updateLobbyUI();
+            if(pageId === 'ranking') this.renderRanking();
         }
 
-        register() { alert("회원가입 성공!"); }
-
         login() {
+            // 모든 기획 스펙 시스템이 구현된 기본 계정 스펙 주입
             this.user = {
-                nickname: document.getElementById('auth-nick').value || "테스터",
-                character: { 
-                    hasCharacter: false, job: '', tier: 1, level: 1, exp: 0, gold: 2000, statPoints: 20, 
-                    stats: { speed: 10, hp: 10, atk: 10, magic: 10 }, 
-                    upgrades: { characterStatEff: 0 } 
-                }
+                id: document.getElementById('auth-id').value || "test",
+                nickname: document.getElementById('auth-nick').value || "모험가",
+                character: {
+                    job: '', level: 1, exp: 0, gold: 3000, statPoints: 10,
+                    stats: { speed: 10, hp: 100, atk: 15, magic: 10 },
+                    upgrades: { char: 0, item: 0, pet: 0 },
+                    pets: [],
+                    items: []
+                },
+                friends: [
+                    { nickname: "아스나", level: 45 },
+                    { nickname: "클라인", level: 32 }
+                ]
             };
             document.getElementById('page-auth').classList.remove('active');
             document.getElementById('main-nav').style.display = 'flex';
@@ -257,105 +324,99 @@
 
         selectJob(jobName) {
             this.user.character.job = jobName;
-            this.user.character.hasCharacter = true;
             document.getElementById('page-job-select').classList.remove('active');
-            this.updateLobbyUI();
             this.switchTab('lobby');
         }
 
         updateLobbyUI() {
+            if(!this.user) return;
             const char = this.user.character;
+            
+            // ① 로비 UI 바인딩
             document.getElementById('lobby-nick').innerText = this.user.nickname;
-            
-            let imgPath = this.getCharacterImagePath();
-            document.getElementById('player-sprite').src = imgPath;
-            
-            document.getElementById('lobby-job').innerText = char.level >= 40 ? `[각성] ${char.job}` : char.job;
+            document.getElementById('lobby-job').innerText = `${char.job} (${char.level >= 40 ? '2차 전직' : '1차 전직'})`;
             document.getElementById('lobby-level').innerText = char.level;
             document.getElementById('lobby-exp').innerText = char.exp;
-            document.getElementById('lobby-next-exp').innerText = Math.floor(100 * Math.pow(char.level, 1.8));
+            
+            const nextExp = Math.floor(100 * Math.pow(char.level, 1.5));
+            document.getElementById('lobby-next-exp').innerText = nextExp;
             document.getElementById('lobby-gold').innerText = char.gold;
-            document.getElementById('lobby-points').innerText = `포인트: ${char.statPoints}`;
+            document.getElementById('lobby-points').innerText = `(남은 포인트: ${char.statPoints})`;
             
             document.getElementById('stat-speed').innerText = char.stats.speed;
             document.getElementById('stat-hp').innerText = char.stats.hp;
             document.getElementById('stat-atk').innerText = char.stats.atk;
             document.getElementById('stat-magic').innerText = char.stats.magic;
+
+            // 로비 및 실시간 캔버스 이미지 동시 동적 연동 보장
+            const imgPath = this.getCharacterImagePath();
+            document.getElementById('player-sprite').src = imgPath;
+            this.playerImg.src = imgPath;
+
+            // ③ 상점 화면 보유내역 동기화
+            document.getElementById('shop-owned-pets').innerText = char.pets.length > 0 ? char.pets.join(', ') : '없음';
+            document.getElementById('shop-owned-items').innerText = char.items.length > 0 ? char.items.join(', ') : '없음';
+
+            // ④ 강화 관리 뷰 데이터 동기화
+            this.updateUpgradeUI();
+
+            // ⑤ 친구 목록 동기화
+            this.updateFriendListUI();
         }
 
-        addStat(statType) {
-            if(this.user.character.statPoints <= 0) return alert("부여할 수 있는 스탯 포인트가 없습니다.");
-            this.user.character.stats[statType]++;
-            this.user.character.statPoints--;
+        logout() {
+            this.user = null;
+            document.getElementById('main-nav').style.display = 'none';
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-auth').classList.add('active');
+            alert("로그아웃 되었습니다.");
+        }
+
+        addStat(type) {
+            if(this.user.character.statPoints > 0) {
+                this.user.character.statPoints--;
+                if(type === 'hp') this.user.character.stats[type] += 20;
+                else this.user.character.stats[type] += 2;
+                this.updateLobbyUI();
+            } else {
+                alert("분배할 수 있는 스탯 포인트가 부족합니다.");
+            }
+        }
+
+        cheatLevelUp() {
+            this.user.character.level += 40;
+            alert("레벨 40을 획득했습니다! 이제 외형이 2nd 파일로 바뀝니다.");
             this.updateLobbyUI();
         }
 
-        // 데스크톱용 키보드 리스너 유지
-        initInputListeners() {
-            window.addEventListener('keydown', (e) => {
-                if(this.gameState !== 'playing') return;
-                if(e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') this.keys.left = true;
-                if(e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') this.keys.right = true;
-                if(e.key === 'ArrowUp' || e.key.toLowerCase() === 'w' || e.key === ' ') { e.preventDefault(); this.playerJump(); }
-                if(e.key.toLowerCase() === 'f' || e.key === 'Enter') this.playerAttack();
-            });
-            window.addEventListener('keyup', (e) => {
-                if(e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') this.keys.left = false;
-                if(e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') this.keys.right = false;
-            });
-        }
-
-        // 스마트폰 모바일 가상 터치패드 바인딩 (멀티 터치 완벽 제어)
-        initMobileTouchControls() {
-            const setupTouch = (id, startFn, endFn) => {
-                const btn = document.getElementById(id);
-                btn.addEventListener('touchstart', (e) => { e.preventDefault(); startFn(); });
-                btn.addEventListener('touchend', (e) => { e.preventDefault(); if(endFn) endFn(); });
-                // 마우스 클릭도 같이 대응
-                btn.addEventListener('mousedown', (e) => { e.preventDefault(); startFn(); });
-                btn.addEventListener('mouseup', (e) => { e.preventDefault(); if(endFn) endFn(); });
-            };
-
-            setupTouch('btn-left', () => this.keys.left = true, () => this.keys.left = false);
-            setupTouch('btn-right', () => this.keys.right = true, () => this.keys.right = false);
-            setupTouch('btn-jump', () => this.playerJump());
-            setupTouch('btn-attack', () => this.playerAttack());
-        }
-
+        // ② 전투 시스템 (확장 벨런스 수식 및 보상 스케일 적용)
         prepareActionBattle(type, difficulty = '') {
             document.getElementById('battle-setup').style.display = 'none';
             document.getElementById('canvas-container').style.display = 'block';
-            
-            // 캔버스 전용 캐릭터 이미지 로드 소스 지정
-            this.playerImg.src = this.getCharacterImagePath();
 
             let stage = parseInt(document.getElementById('boss-stage-select').value);
-            let multiplier = type === 'boss' ? stage : (difficulty === 'high' ? 40 : 15);
+            let scale = type === 'boss' ? stage : (difficulty === 'high' ? 25 : 10);
             
-            // 레벨이 낮으면 절대 못깨도록 공격력/체력 밸런스 공식 확장 스케일링
-            let monsterHp = 100 + Math.pow(multiplier, 2.2) * 50; 
-            let monsterAtk = 5 + Math.pow(multiplier, 1.7) * 5; 
-            
-            let goldReward = type === 'boss' ? stage * 120 : (difficulty === 'high' ? 2500 : 700);
-            let expReward = type === 'boss' ? stage * 80 : (difficulty === 'high' ? 1800 : 500);
+            let mHp = 80 + Math.pow(scale, 2.1) * 45;
+            let mAtk = 4 + Math.pow(scale, 1.5) * 4;
 
-            // 유저 실제 인게임 스탯 가중치 주입
-            const playerHpMax = 100 + (this.user.character.stats.hp * 20) + (this.user.character.level * 12);
-            const playerAtkPower = 15 + (this.user.character.stats.atk * 4) + (this.user.character.level * 2);
-            const playerSpeedStat = 3.5 + (this.user.character.stats.speed * 0.1);
+            // 레이드전 상 난이도 보상 3배 규칙 계산기
+            let goldReward = type === 'boss' ? stage * 150 : (difficulty === 'high' ? 1800 : 600);
+            let expReward = type === 'boss' ? stage * 100 : (difficulty === 'high' ? 1500 : 500);
+
+            // 강화 보너스 수치 주입
+            let upgradeBonusAtk = this.user.character.upgrades.item * 15;
+            let upgradeBonusHp = this.user.character.upgrades.char * 100;
 
             this.gameObject = {
                 player: {
-                    x: 40, y: 150, width: 32, height: 45, // 이미지 비율 보정용 크기 조절
-                    vx: 0, vy: 0, isGrounded: false,
-                    hp: playerHpMax, maxHp: playerHpMax,
-                    atk: playerAtkPower, speed: playerSpeedStat,
+                    x: 40, y: 150, width: 35, height: 45, vx: 0, vy: 0, isGrounded: false,
+                    hp: this.user.character.stats.hp + upgradeBonusHp, maxHp: this.user.character.stats.hp + upgradeBonusHp,
+                    atk: this.user.character.stats.atk + upgradeBonusAtk, speed: 4 + (this.user.character.stats.speed * 0.1),
                     attackCooldown: 0, isAttacking: 0
                 },
                 monster: {
-                    x: 280, y: 135, width: 50, height: 60,
-                    hp: monsterHp, maxHp: monsterHp,
-                    atk: monsterAtk, attackTimer: 0
+                    x: 290, y: 135, width: 50, height: 60, hp: mHp, maxHp: mHp, atk: mAtk, attackTimer: 0
                 },
                 rewards: { gold: goldReward, exp: expReward }
             };
@@ -364,31 +425,34 @@
             this.runGameLoop();
         }
 
-        playerJump() {
-            let p = this.gameObject.player;
-            if(p.isGrounded) { p.vy = -9.5; p.isGrounded = false; }
-        }
-
-        playerAttack() {
-            let p = this.gameObject.player;
-            if(p.attackCooldown <= 0) {
-                p.isAttacking = 8;
-                p.attackCooldown = 15;
-                let m = this.gameObject.monster;
-                if(Math.abs((p.x + p.width/2) - (m.x + m.width/2)) < 60 && p.y + p.height > m.y) {
-                    m.hp = Math.max(0, m.hp - p.atk);
+        initMobileTouchControls() {
+            const bindTouch = (id, pressFn, releaseFn) => {
+                const el = document.getElementById(id);
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); pressFn(); });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); if(releaseFn) releaseFn(); });
+                el.addEventListener('mousedown', (e) => { e.preventDefault(); pressFn(); });
+                el.addEventListener('mouseup', (e) => { e.preventDefault(); if(releaseFn) releaseFn(); });
+            };
+            bindTouch('btn-left', () => this.keys.left = true, () => this.keys.left = false);
+            bindTouch('btn-right', () => this.keys.right = true, () => this.keys.right = false);
+            bindTouch('btn-jump', () => {
+                let p = this.gameObject?.player;
+                if(p && p.isGrounded) { p.vy = -9.5; p.isGrounded = false; }
+            });
+            bindTouch('btn-attack', () => {
+                let p = this.gameObject?.player;
+                if(p && p.attackCooldown <= 0) {
+                    p.isAttacking = 8; p.attackCooldown = 12;
+                    let m = this.gameObject.monster;
+                    if(Math.abs((p.x + p.width/2) - (m.x + m.width/2)) < 65) m.hp = Math.max(0, m.hp - p.atk);
                 }
-            }
+            });
         }
 
         runGameLoop() {
             if (this.gameState !== 'playing') return;
-            this.updatePhysics();
-            this.renderGame();
-            this.gameLoopId = requestAnimationFrame(() => this.runGameLoop());
-        }
-
-        updatePhysics() {
+            
+            // 물리 계산
             let p = this.gameObject.player;
             let m = this.gameObject.monster;
 
@@ -396,102 +460,196 @@
             else if (this.keys.right) p.vx = p.speed;
             else p.vx = 0;
 
-            p.vy += 0.45; // 중력
-            p.x += p.vx;
-            p.y += p.vy;
-
-            if(p.x < 0) p.x = 0;
-            if(p.x > this.canvas.width - p.width) p.x = this.canvas.width - p.width;
-
-            if (p.y >= 195 - p.height) { p.y = 195 - p.height; p.vy = 0; p.isGrounded = true; }
-
+            p.vy += 0.5; p.x += p.vx; p.y += p.vy;
+            if(p.x < 0) p.x = 0; if(p.x > 365) p.x = 365;
+            if(p.y >= 195 - p.height) { p.y = 195 - p.height; p.vy = 0; p.isGrounded = true; }
             if(p.attackCooldown > 0) p.attackCooldown--;
             if(p.isAttacking > 0) p.isAttacking--;
 
-            // 보스 AI 타격 주기 추적
             if(m.hp > 0) {
-                m.x += p.x < m.x ? -0.9 : 0.9;
+                m.x += p.x < m.x ? -0.8 : 0.8;
                 m.attackTimer++;
-                if(m.attackTimer % 40 === 0) {
-                    if(Math.abs((p.x + p.width/2) - (m.x + m.width/2)) < 35 && p.y + p.height > m.y) {
-                        p.hp = Math.max(0, p.hp - m.atk);
-                    }
+                if(m.attackTimer % 45 === 0 && Math.abs((p.x + p.width/2) - (m.x + m.width/2)) < 40) {
+                    p.hp = Math.max(0, p.hp - m.atk);
                 }
             }
 
+            // 실시간 이미지 기반 그리기
+            this.ctx.fillStyle = '#1e272e'; this.ctx.fillRect(0, 0, 400, 220);
+            this.ctx.fillStyle = '#485460'; this.ctx.fillRect(0, 195, 400, 25);
+
+            if(this.playerImg.complete && this.playerImg.naturalWidth !== 0) {
+                this.ctx.drawImage(this.playerImg, p.x, p.y, p.width, p.height);
+            } else {
+                this.ctx.fillStyle = '#00a8ff'; this.ctx.fillRect(p.x, p.y, p.width, p.height);
+            }
+
+            if(p.isAttacking > 0) {
+                this.ctx.fillStyle = 'rgba(255,255,255,0.7)'; this.ctx.fillRect(p.x + (p.vx >= 0 ? p.width : -20), p.y + 15, 20, 8);
+            }
+            if(m.hp > 0) { this.ctx.fillStyle = '#ef5777'; this.ctx.fillRect(m.x, m.y, m.width, m.height); }
+
+            // HP 바
+            this.ctx.fillStyle = '#333'; this.ctx.fillRect(10, 10, 100, 10);
+            this.ctx.fillStyle = '#00d2d3'; this.ctx.fillRect(10, 10, (p.hp / p.maxHp) * 100, 10);
+            this.ctx.fillStyle = '#333'; this.ctx.fillRect(290, 10, 100, 10);
+            this.ctx.fillStyle = '#ff577f'; this.ctx.fillRect(290, 10, (m.hp / m.maxHp) * 100, 10);
+
             if(p.hp <= 0) this.endBattle(false);
             else if(m.hp <= 0) this.endBattle(true);
+            else this.gameLoopId = requestAnimationFrame(() => this.runGameLoop());
         }
 
-        renderGame() {
-            let ctx = this.ctx;
-            let p = this.gameObject.player;
-            let m = this.gameObject.monster;
-
-            ctx.fillStyle = '#1e272e';
-            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-            // 땅
-            ctx.fillStyle = '#485460';
-            ctx.fillRect(0, 195, this.canvas.width, 25);
-
-            // [변경] 사각형 대신 실제 내 캐릭터 파일 이미지 그리기
-            if (this.playerImg.complete && this.playerImg.naturalWidth !== 0) {
-                ctx.drawImage(this.playerImg, p.x, p.y, p.width, p.height);
-            } else {
-                // 이미지 로드가 안 됐을 때의 디폴트 사각형 대체선
-                ctx.fillStyle = '#00a8ff';
-                ctx.fillRect(p.x, p.y, p.width, p.height);
-            }
-            
-            if(p.isAttacking > 0) {
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.fillRect(p.x + p.width, p.y + 10, 25, 8);
-            }
-
-            // 보스 그리기
-            if(m.hp > 0) {
-                ctx.fillStyle = '#ef5777';
-                ctx.fillRect(m.x, m.y, m.width, m.height);
-            }
-
-            // UI 렌더링
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(10, 10, 120, 12);
-            ctx.fillStyle = '#00d2d3';
-            ctx.fillRect(10, 10, (p.hp / p.maxHp) * 120, 12);
-
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(270, 10, 120, 12);
-            ctx.fillStyle = '#ff577f';
-            ctx.fillRect(270, 10, (m.hp / m.maxHp) * 120, 12);
-        }
-
-        endBattle(isSuccess) {
-            this.gameState = 'ended';
-            cancelAnimationFrame(this.gameLoopId);
-
-            if(isSuccess) {
+        endBattle(success) {
+            this.gameState = 'ended'; cancelAnimationFrame(this.gameLoopId);
+            if(success) {
                 this.user.character.gold += this.gameObject.rewards.gold;
                 this.user.character.exp += this.gameObject.rewards.exp;
-                alert("⚔️ 전투 승리! 보상 획득 완료.");
+                alert(`승리! [골드 +${this.gameObject.rewards.gold} G / 경험치 +${this.gameObject.rewards.exp} 획득]`);
+                this.checkLevelUp();
             } else {
-                alert("💥 전투 실패... 더 강해져서 도전하세요!");
+                alert("보스에게 패배했습니다.. 스탯 강화를 진행해보세요!");
             }
             this.exitBattle();
         }
 
-        exitBattle() {
-            this.gameState = 'idle';
-            this.keys = { left: false, right: false };
-            cancelAnimationFrame(this.gameLoopId);
-            document.getElementById('battle-setup').style.display = 'block';
-            document.getElementById('canvas-container').style.display = 'none';
-            if(this.user) this.updateLobbyUI();
+        checkLevelUp() {
+            let char = this.user.character;
+            let nextExp = Math.floor(100 * Math.pow(char.level, 1.5));
+            if(char.exp >= nextExp) {
+                char.exp -= nextExp; char.level++; char.statPoints += 5;
+                alert(`🎉 레벨 업! 현재 레벨 ${char.level} (스탯 포인트 +5)`);
+            }
         }
 
-        switchSubUpgrade() {}
-        executeUpgrade() {}
+        exitBattle() {
+            this.gameState = 'idle'; cancelAnimationFrame(this.gameLoopId);
+            document.getElementById('battle-setup').style.display = 'block';
+            document.getElementById('canvas-container').style.display = 'none';
+            this.updateLobbyUI();
+        }
+
+        // ③ 상점 시스템
+        buyPet(name) {
+            if(this.user.character.gold < 500) return alert("재화(골드)가 부족합니다.");
+            this.user.character.gold -= 500;
+            this.user.character.pets.push(name);
+            alert(`${name} 분양이 완료되었습니다!`);
+            this.updateLobbyUI();
+        }
+
+        buyItem(code, price) {
+            if(this.user.character.gold < price) return alert("재화(골드)가 부족합니다.");
+            this.user.character.gold -= price;
+            this.user.character.items.push(code);
+            if(code === 'shoes') this.user.character.stats.speed += 5;
+            if(code === 'armor') this.user.character.stats.hp += 50;
+            if(code === 'weapon') this.user.character.stats.atk += 10;
+            if(code === 'ring') this.user.character.stats.magic += 10;
+            alert("장비를 성공적으로 구매하여 스탯이 즉시 상승했습니다.");
+            this.updateLobbyUI();
+        }
+
+        // ④ 강화 시스템 및 확률 제어 규칙 적용
+        switchSubUpgrade(tab) {
+            this.currentUpgradeTab = tab;
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`sub-tab-${tab}`).classList.add('active');
+            
+            const titles = { char: "캐릭터 능력치 효율 강화", item: "구매한 장비 무기 강화", pet: "분양된 분신 펫 강화" };
+            document.getElementById('upgrade-title').innerText = titles[tab];
+            this.updateUpgradeUI();
+        }
+
+        updateUpgradeUI() {
+            if(!this.user) return;
+            const currentLv = this.user.character.upgrades[this.currentUpgradeTab];
+            document.getElementById('upgrade-level-val').innerText = currentLv;
+
+            if(currentLv >= 5) {
+                document.getElementById('upgrade-info').innerText = "최대 강화 단계에 도달했습니다.";
+            } else {
+                // 기획 확률 규칙 설계: 1강 100%, 2강 80%, 3강 60%, 4강 40%, 5강 20%
+                const probs = [100, 80, 60, 40, 20];
+                const cost = (currentLv + 1) * 200;
+                document.getElementById('upgrade-info').innerText = `다음 강화 확률: ${probs[currentLv]}% (소모 골드: ${cost} G)`;
+            }
+        }
+
+        executeUpgrade() {
+            let currentLv = this.user.character.upgrades[this.currentUpgradeTab];
+            if(currentLv >= 5) return alert("더 이상 강화할 수 없습니다 (최대 5강)");
+
+            const cost = (currentLv + 1) * 200;
+            if(this.user.character.gold < cost) return alert("강화 비용이 부족합니다.");
+
+            this.user.character.gold -= cost;
+            const probs = [100, 80, 60, 40, 20];
+            const rand = Math.random() * 100;
+
+            if(rand <= probs[currentLv]) {
+                this.user.character.upgrades[this.currentUpgradeTab]++;
+                alert(`✨ 강화 성공! 현재 [${this.user.character.upgrades[this.currentUpgradeTab]} 강] 상태입니다.`);
+            } else {
+                alert("💥 강화에 실패했습니다. (장비가 파괴되지는 않았습니다)");
+            }
+            this.updateLobbyUI();
+        }
+
+        resetCharacterStats() {
+            if(this.user.character.gold < 100) return alert("초기화 골드가 부족합니다.");
+            this.user.character.gold -= 100;
+            this.user.character.statPoints = 10 + (this.user.character.level - 1) * 5;
+            this.user.character.stats = { speed: 10, hp: 100, atk: 15, magic: 10 };
+            alert("캐릭터 기본 스탯이 완전히 초기화되었으며 포인트로 반환되었습니다.");
+            this.updateLobbyUI();
+        }
+
+        // ⑤ 친구 시스템
+        addFriend() {
+            const id = document.getElementById('friend-search-id').value.trim();
+            if(!id) return alert("아이디를 적어주세요.");
+            this.user.friends.push({ nickname: `친구_${id}`, level: Math.floor(Math.random() * 30) + 1 });
+            document.getElementById('friend-search-id').value = '';
+            alert(`${id}님에게 요청을 보낸 뒤 친구로 등록했습니다.`);
+            this.updateLobbyUI();
+        }
+
+        updateFriendListUI() {
+            const tbody = document.getElementById('friend-table-body');
+            tbody.innerHTML = '';
+            if(this.user.friends.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2">친구가 없습니다.</td></tr>';
+                return;
+            }
+            this.user.friends.forEach(f => {
+                tbody.innerHTML += `<tr><td>${f.nickname}</td><td>Lv.${f.level}</td></tr>`;
+            });
+        }
+
+        // ⑥ 랭킹 보드 TOP 10 렌더링 시스템
+        renderRanking() {
+            const tbody = document.getElementById('ranking-table-body');
+            tbody.innerHTML = '';
+        
+
+            // 로그인한 유저 본인을 리스트에 포함 후 정렬
+            if(this.user) {
+                rankers.push({ nickname: this.user.nickname, job: this.user.character.job || "무직", level: this.user.character.level });
+            }
+            rankers.sort((a, b) => b.level - a.level);
+
+            // 상위 10명만 슬라이스해서 화면에 표출
+            rankers.slice(0, 10).forEach((r, idx) => {
+                let style = r.nickname === this.user?.nickname ? "style='background:#fff3cd; font-weight:bold;'" : "";
+                tbody.innerHTML += `<tr ${style}>
+                    <td>${idx + 1}위</td>
+                    <td>${r.nickname}</td>
+                    <td>${r.job}</td>
+                    <td>Lv.${r.level}</td>
+                </tr>`;
+            });
+        }
     }
 
     const game = new GameEngine();
