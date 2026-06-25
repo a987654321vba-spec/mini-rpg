@@ -25,7 +25,7 @@
         header { background: var(--primary); padding: 15px; text-align: center; font-weight: bold; color: white; font-size: 1.2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
         .page { display: none; }
-        .page.active { display: block; }
+        .page.active { display: block !important; } /* 강제 출력 보장 */
 
         nav {
             position: absolute; bottom: 0; width: 100%; height: 65px;
@@ -45,8 +45,8 @@
         .input-group { margin-bottom: 12px; display: flex; gap: 5px; }
         input, select { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; outline: none; }
         
-        .char-display { width: 130px; height: 130px; margin: 15px auto; background: #fafafa; border-radius: 16px; display: flex; justify-content: center; align-items: center; border: 3px dashed var(--primary); overflow: hidden; }
-        .char-img { max-width: 95%; max-height: 95%; object-fit: contain; }
+        .char-display { width: 130px; height: 130px; margin: 15px auto; background: #fafafa; border-radius: 16px; display: flex; justify-content: center; align-items: center; border: 3px dashed var(--primary); overflow: hidden; position: relative; }
+        .char-img { max-width: 95%; max-height: 95%; object-fit: contain; display: block; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         th, td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
@@ -123,7 +123,8 @@
                 <p id="lobby-job" style="color:var(--secondary); font-weight:bold; margin-top:5px;">직업</p>
                 
                 <div class="char-display">
-                    <img id="player-sprite" class="char-img" src="" alt="캐릭터 외형">
+                    <img id="player-sprite" class="char-img" src="" alt="캐릭터 외형" onerror="this.style.display='none'; document.getElementById('char-fallback').style.display='block';">
+                    <div id="char-fallback" style="display:none; font-weight:bold; color:var(--secondary);">[캐릭터 준비됨]</div>
                 </div>
 
                 <div style="margin-top:15px; font-size: 0.9rem; line-height:1.6;">
@@ -293,7 +294,6 @@
     class GameEngine {
         constructor() {
             this.user = null;
-            // 로컬스토리지에서 데이터를 먼저 가져오고, 없으면 빈 객체 생성
             this.database = JSON.parse(localStorage.getItem('rpg_database')) || {}; 
             this.currentUpgradeTab = 'char';
             this.canvas = document.getElementById('gameCanvas');
@@ -314,6 +314,8 @@
 
         initBattleStages() {
             const select = document.getElementById('boss-stage-select');
+            if(!select) return;
+            select.innerHTML = '';
             for(let i=1; i<=30; i++) {
                 let opt = document.createElement('option');
                 opt.value = i; opt.innerText = `${i}단계 보스 배틀`;
@@ -332,10 +334,12 @@
             const nick = document.getElementById('reg-nick').value.trim();
 
             if(!id || !pw || !nick) return alert("회원가입 정보를 전부 입력해 주세요!");
+            
+            this.database = JSON.parse(localStorage.getItem('rpg_database')) || {};
             if(this.database[id]) return alert("이미 존재하는 아이디입니다.");
 
             const isNickDuplicate = Object.values(this.database).some(user => user.nickname === nick);
-            if(isNickDuplicate) return alert("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요!");
+            if(isNickDuplicate) return alert("이미 사용 중인 닉네임입니다.");
 
             this.database[id] = {
                 id: id, password: pw, nickname: nick,
@@ -348,7 +352,7 @@
                 friendRequests: [], friends: []
             };
 
-            this.saveToLocalStorage(); // 변경점 저장
+            this.saveToLocalStorage(); 
             alert("회원가입 성공! 로그인 후 직업을 선택해 주세요.");
             document.getElementById('reg-id').value = '';
             document.getElementById('reg-pw').value = '';
@@ -362,7 +366,6 @@
 
             if(!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
             
-            // 최신 로컬스토리지 데이터를 항상 반영
             this.database = JSON.parse(localStorage.getItem('rpg_database')) || {};
 
             if(!this.database[id] || this.database[id].password !== pw) {
@@ -370,7 +373,9 @@
             }
 
             this.user = this.database[id];
-            document.getElementById('page-auth').classList.remove('active');
+            
+            // 모든 페이지 비활성화 후 판단
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
             if(!this.user.character.job) {
                 document.getElementById('main-nav').style.display = 'none';
@@ -381,19 +386,17 @@
             }
         }
 
-        // [버그 수정] 직업 선택 후 화면 전환 및 데이터 동기화 문제 완전히 해결
         selectJob(jobName) {
             if(!this.user) return;
-            this.user.character.job = jobName;
             
+            this.user.character.job = jobName;
             this.database[this.user.id] = this.user;
             this.saveToLocalStorage(); 
 
-            // 직업선택 화면 확실하게 제거
+            // 화면 전환 안정성 강화
             document.getElementById('page-job-select').classList.remove('active');
             document.getElementById('main-nav').style.display = 'flex';
             
-            // 로비 탭 활성화 유도
             this.switchTab('lobby', document.getElementById('nav-lobby'));
         }
 
@@ -405,11 +408,15 @@
 
         switchTab(pageId, btnElement) {
             this.exitBattle();
+            
+            // 클래스 제거 명확화
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             
             const targetPage = document.getElementById(`page-${pageId}`);
-            if(targetPage) targetPage.classList.add('active');
+            if(targetPage) {
+                targetPage.classList.add('active');
+            }
             
             if(btnElement) btnElement.classList.add('active');
             
@@ -477,9 +484,17 @@
                 displayDiv.innerHTML = `<div>❤️ 체력: ${final.hp}</div><div>⚡ 속도: ${final.speed}</div><div>⚔️ 공격: ${final.atk}</div><div>🔮 마력: ${final.magic}</div>`;
             }
 
+            // 이미지 로드 예외 처리 강화
+            const imgEl = document.getElementById('player-sprite');
+            const fallbackEl = document.getElementById('char-fallback');
             const imgPath = this.getCharacterImagePath();
-            document.getElementById('player-sprite').src = imgPath;
-            this.playerImg.src = imgPath;
+            
+            if(imgEl && fallbackEl) {
+                imgEl.style.display = 'block';
+                fallbackEl.style.display = 'none';
+                imgEl.src = imgPath;
+                this.playerImg.src = imgPath;
+            }
 
             document.getElementById('shop-owned-pets').innerText = char.pets.length > 0 ? char.pets[0] : '없음';
             
@@ -554,6 +569,7 @@
         initMobileTouchControls() {
             const bindTouch = (id, pressFn, releaseFn) => {
                 const el = document.getElementById(id);
+                if(!el) return;
                 el.addEventListener('touchstart', (e) => { e.preventDefault(); pressFn(); }, {passive: false});
                 el.addEventListener('touchend', (e) => { e.preventDefault(); if(releaseFn) releaseFn(); }, {passive: false});
                 el.addEventListener('mousedown', (e) => { e.preventDefault(); pressFn(); });
@@ -602,7 +618,7 @@
             this.ctx.fillStyle = '#1e272e'; this.ctx.fillRect(0, 0, 400, 220);
             this.ctx.fillStyle = '#485460'; this.ctx.fillRect(0, 195, 400, 25);
 
-            if(this.playerImg.complete && this.playerImg.naturalWidth !== 0) {
+            if(this.playerImg.complete && this.playerImg.naturalWidth !== 0 && this.playerImg.src) {
                 this.ctx.drawImage(this.playerImg, p.x, p.y, p.width, p.height);
             } else {
                 this.ctx.fillStyle = '#00a8ff'; this.ctx.fillRect(p.x, p.y, p.width, p.height);
@@ -630,7 +646,7 @@
         endBattle(success) {
             this.gameState = 'ended'; cancelAnimationFrame(this.gameLoopId);
             if(this.gameObject.battleType === 'friendPvP') {
-                alert(success ? `⚔️ 친선전 승리! 친구의 성장을 확인해볼 수 있는 기회였습니다.` : `⚔️ 친선전 패배.. 친구가 한 발 앞서 나가고 있군요!`);
+                alert(success ? `⚔️ 친선전 승리!` : `⚔️ 친선전 패배..`);
             } else {
                 if(success) {
                     this.user.character.gold += this.gameObject.rewards.gold;
@@ -801,8 +817,6 @@
             if(this.database[friend.id]) {
                 friend.level = this.database[friend.id].character.level;
             }
-            
-            alert(`⚔️ [${friend.nickname}]님에게 결투를 신청합니다! 실시간 친선전을 시작합니다.`);
             this.prepareActionBattle('friendPvP', '', friend);
         }
 
