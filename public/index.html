@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <!-- 직업 선택 페이지 (네비게이션 차단됨) -->
+        <!-- 직업 선택 페이지 -->
         <div id="page-job-select" class="page">
             <div class="card" style="text-align: center;">
                 <h3>클래스 전직 선택</h3>
@@ -280,7 +280,7 @@
 
     <!-- 탭 네비게이션 바 -->
     <nav id="main-nav" style="display:none;">
-        <button class="nav-btn active" onclick="game.switchTab('lobby', this)">로비</button>
+        <button class="nav-btn active" id="nav-lobby" onclick="game.switchTab('lobby', this)">로비</button>
         <button class="nav-btn" onclick="game.switchTab('battle', this)">전투</button>
         <button class="nav-btn" onclick="game.switchTab('shop', this)">상점</button>
         <button class="nav-btn" onclick="game.switchTab('upgrade', this)">강화</button>
@@ -293,7 +293,8 @@
     class GameEngine {
         constructor() {
             this.user = null;
-            this.database = {}; 
+            // 로컬스토리지에서 데이터를 먼저 가져오고, 없으면 빈 객체 생성
+            this.database = JSON.parse(localStorage.getItem('rpg_database')) || {}; 
             this.currentUpgradeTab = 'char';
             this.canvas = document.getElementById('gameCanvas');
             this.ctx = this.canvas.getContext('2d');
@@ -305,6 +306,10 @@
 
             this.initBattleStages();
             this.initMobileTouchControls();
+        }
+
+        saveToLocalStorage() {
+            localStorage.setItem('rpg_database', JSON.stringify(this.database));
         }
 
         initBattleStages() {
@@ -343,6 +348,7 @@
                 friendRequests: [], friends: []
             };
 
+            this.saveToLocalStorage(); // 변경점 저장
             alert("회원가입 성공! 로그인 후 직업을 선택해 주세요.");
             document.getElementById('reg-id').value = '';
             document.getElementById('reg-pw').value = '';
@@ -355,6 +361,10 @@
             const pw = document.getElementById('login-pw').value.trim();
 
             if(!id || !pw) return alert("아이디와 비밀번호를 입력해주세요.");
+            
+            // 최신 로컬스토리지 데이터를 항상 반영
+            this.database = JSON.parse(localStorage.getItem('rpg_database')) || {};
+
             if(!this.database[id] || this.database[id].password !== pw) {
                 return alert("아이디 혹은 비밀번호가 일치하지 않습니다!");
             }
@@ -367,15 +377,24 @@
                 document.getElementById('page-job-select').classList.add('active');
             } else {
                 document.getElementById('main-nav').style.display = 'flex';
-                this.switchTab('lobby');
+                this.switchTab('lobby', document.getElementById('nav-lobby'));
             }
         }
 
+        // [버그 수정] 직업 선택 후 화면 전환 및 데이터 동기화 문제 완전히 해결
         selectJob(jobName) {
+            if(!this.user) return;
             this.user.character.job = jobName;
+            
+            this.database[this.user.id] = this.user;
+            this.saveToLocalStorage(); 
+
+            // 직업선택 화면 확실하게 제거
             document.getElementById('page-job-select').classList.remove('active');
             document.getElementById('main-nav').style.display = 'flex';
-            this.switchTab('lobby');
+            
+            // 로비 탭 활성화 유도
+            this.switchTab('lobby', document.getElementById('nav-lobby'));
         }
 
         getCharacterImagePath() {
@@ -388,7 +407,10 @@
             this.exitBattle();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
+            
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if(targetPage) targetPage.classList.add('active');
+            
             if(btnElement) btnElement.classList.add('active');
             
             this.updateLobbyUI();
@@ -435,7 +457,7 @@
             const char = this.user.character;
             
             document.getElementById('lobby-nick').innerText = this.user.nickname;
-            document.getElementById('lobby-job').innerText = `${char.job} (${char.level >= 40 ? '2차 마스터' : '1차 클래스'})`;
+            document.getElementById('lobby-job').innerText = char.job ? `${char.job} (${char.level >= 40 ? '2차 마스터' : '1차 클래스'})` : '무직';
             document.getElementById('lobby-level').innerText = char.level;
             document.getElementById('lobby-exp').innerText = char.exp;
             
@@ -479,6 +501,7 @@
 
             char.statPoints--;
             char.stats[type]++;
+            this.saveToLocalStorage();
             this.updateLobbyUI();
         }
 
@@ -612,6 +635,7 @@
                 if(success) {
                     this.user.character.gold += this.gameObject.rewards.gold;
                     this.user.character.exp += this.gameObject.rewards.exp;
+                    this.saveToLocalStorage();
                     alert(`전투 승리! [골드 +${this.gameObject.rewards.gold} G / 경험치 +${this.gameObject.rewards.exp} 획득]`);
                     this.checkLevelUp();
                 } else {
@@ -628,6 +652,7 @@
             let nextExp = Math.floor(100 * Math.pow(char.level, 1.5));
             if(char.exp >= nextExp) {
                 char.exp -= nextExp; char.level++; char.statPoints += 4;
+                this.saveToLocalStorage();
                 alert(`🎉 레벨 업! 현재 레벨 ${char.level}`);
                 if(char.level >= 70) { char.level = 70; alert("🏆 최고 레벨(70) 도달!"); }
             }
@@ -643,12 +668,14 @@
         buyPet(name) {
             if(this.user.character.gold < 2000) return alert("골드가 부족합니다. (분양가: 2,000G)");
             this.user.character.gold -= 2000; this.user.character.pets = [name];
+            this.saveToLocalStorage();
             alert(`[${name}] 분양이 완료되었습니다!`); this.updateLobbyUI();
         }
 
         buyItem(code, price) {
             if(this.user.character.gold < price) return alert("골드가 부족합니다.");
             this.user.character.gold -= price; this.user.character.items.push(code);
+            this.saveToLocalStorage();
             alert("장비를 장착했습니다!"); this.updateLobbyUI();
         }
 
@@ -688,6 +715,7 @@
             } else {
                 alert("💥 강화에 실패했습니다.");
             }
+            this.saveToLocalStorage();
             this.updateLobbyUI();
         }
 
@@ -696,25 +724,24 @@
             this.user.character.gold -= 100;
             this.user.character.statPoints = 10 + (this.user.character.level - 1) * 4;
             this.user.character.stats = { speed: 1, hp: 1, atk: 1, magic: 1 };
+            this.saveToLocalStorage();
             alert("스탯이 초기화되었습니다."); this.updateLobbyUI();
         }
 
-        // [버그 수정 완료] 상대방 데이터베이스에 요청을 푸시하도록 완벽 변경
         sendFriendRequest() {
             const targetId = document.getElementById('friend-search-id').value.trim();
             if(!targetId) return alert("아이디를 적어주세요.");
             if(targetId === this.user.id) return alert("본인에게는 요청할 수 없습니다.");
             if(!this.database[targetId]) return alert("존재하지 않는 회원 아이디입니다.");
             
-            // 이미 보냈거나 이미 친구인지 체크하는 예외처리 추가
             if(this.database[targetId].friendRequests.includes(this.user.id)) {
                 return alert("이미 상대방에게 친구 요청을 보낸 상태입니다.");
             }
             const alreadyFriend = this.user.friends.some(f => f.id === targetId);
             if(alreadyFriend) return alert("이미 친구 등록이 완료된 유저입니다.");
 
-            // 내 리스트가 아닌 상대방 데이터베이스에 내 ID를 추가
             this.database[targetId].friendRequests.push(this.user.id);
+            this.saveToLocalStorage();
             document.getElementById('friend-search-id').value = '';
             alert(`[${targetId}] 유저에게 친구 요청을 보냈습니다.`);
             this.updateFriendListUI();
@@ -734,12 +761,14 @@
                 targetUser.friends.push({ id: this.user.id, nickname: this.user.nickname, level: this.user.character.level });
             }
 
+            this.saveToLocalStorage();
             alert(`[${targetNick}]님과 정식 친구가 되었습니다!`);
             this.updateFriendListUI();
         }
 
         updateFriendListUI() {
             const reqBody = document.getElementById('friend-request-body');
+            if(!reqBody) return;
             reqBody.innerHTML = '';
             if(!this.user.friendRequests || this.user.friendRequests.length === 0) {
                 reqBody.innerHTML = '<tr><td colspan="2" style="color:#aaa;">받은 요청이 없습니다.</td></tr>';
@@ -750,6 +779,7 @@
             }
 
             const tbody = document.getElementById('friend-table-body');
+            if(!tbody) return;
             tbody.innerHTML = '';
             if(!this.user.friends || this.user.friends.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" style="color:#aaa;">수락 완료된 정식 친구가 없습니다.</td></tr>';
@@ -778,6 +808,7 @@
 
         renderRanking() {
             const tbody = document.getElementById('ranking-table-body');
+            if(!tbody) return;
             tbody.innerHTML = '';
             let rankers = Object.values(this.database).map(u => ({
                 nickname: u.nickname, job: u.character.job || "무직", level: u.character.level
