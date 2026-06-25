@@ -76,7 +76,6 @@
     <header id="game-title">미니 어드벤처 RPG</header>
     
     <div class="content-area">
-        <!-- 로그인 페이지 -->
         <div id="page-auth" class="page active">
             <div class="card" id="auth-login-box">
                 <h3 style="margin-bottom:15px; text-align:center;">모험가 로그인</h3>
@@ -96,7 +95,6 @@
             </div>
         </div>
 
-        <!-- ① 로비 페이지 -->
         <div id="page-lobby" class="page">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -133,7 +131,6 @@
             </div>
         </div>
 
-        <!-- ② 전투 페이지 -->
         <div id="page-battle" class="page">
             <div id="battle-setup">
                 <div class="card">
@@ -157,7 +154,6 @@
                 </div>
             </div>
 
-            <!-- 인게임 화면 -->
             <div id="canvas-container">
                 <canvas id="gameCanvas" width="400" height="220"></canvas>
                 <div class="mobile-pad">
@@ -170,7 +166,6 @@
             </div>
         </div>
 
-        <!-- ③ 상점 페이지 -->
         <div id="page-shop" class="page">
             <div class="card">
                 <h4>🐷 펫 분양 (각 2,000 G)</h4>
@@ -206,7 +201,6 @@
             </div>
         </div>
 
-        <!-- ④ 강화 페이지 -->
         <div id="page-upgrade" class="page">
             <div class="sub-nav">
                 <button class="sub-btn active" id="sub-tab-char" onclick="game.switchSubUpgrade('char')">캐릭터 강화</button>
@@ -222,7 +216,6 @@
             </div>
         </div>
 
-        <!-- ⑤ 친구 페이지 -->
         <div id="page-friends" class="page">
             <div class="card">
                 <h4>🔍 친구 ID 추가 요청</h4>
@@ -250,7 +243,6 @@
             </div>
         </div>
 
-        <!-- ⑥ 랭킹 페이지 -->
         <div id="page-ranking" class="page">
             <div class="card">
                 <h4>🏆 전 서버 실시간 TOP 랭킹 보드</h4>
@@ -262,7 +254,6 @@
         </div>
     </div>
 
-    <!-- 탭 네비게이션 바 -->
     <nav id="main-nav" style="display:none;">
         <button class="nav-btn active" id="nav-lobby" onclick="game.switchTab('lobby', this)">로비</button>
         <button class="nav-btn" onclick="game.switchTab('battle', this)">전투</button>
@@ -376,10 +367,20 @@
             this.database[id] = this.user;
             this.saveToLocalStorage();
 
-            // 강제 직업 선택창 삭제 -> 무조건 메인 네비게이션 활성화 및 로비 직행
+            // [수정 구간] 하단 탭을 활성화하고 로비 화면으로 안전하게 UI 강제 이동 처리
+            const mainNav = document.getElementById('main-nav');
+            if (mainNav) {
+                mainNav.style.setProperty('display', 'flex', 'important');
+            }
+
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('main-nav').style.display = 'flex';
-            this.switchTab('lobby', document.getElementById('nav-lobby'));
+            const lobbyPage = document.getElementById('page-lobby');
+            if (lobbyPage) {
+                lobbyPage.classList.add('active');
+            }
+
+            const lobbyBtn = document.getElementById('nav-lobby');
+            this.switchTab('lobby', lobbyBtn);
         }
 
         getCharacterImagePath() {
