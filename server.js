@@ -1,13 +1,12 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs'); // 파일 읽고 쓰기를 위한 모듈
+const fs = require('fs');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 데이터 파일 경로 설정 (서버 폴더 내에 users.json 파일로 저장됨)
 const DATA_FILE = path.join(__dirname, 'users.json');
 
 // 파일에서 유저 데이터 불러오기
@@ -92,7 +91,7 @@ app.post('/api/auth/login', (req, res) => {
     res.json({ success: true, user });
 });
 
-// 3. 직업 선택 API (프론트엔드 호환성 보완 완료)
+// 3. 직업 선택 API (기존 프론트엔드 호환용 원상복구)
 app.post('/api/char/select-job', (req, res) => {
     const { username, job } = req.body;
     const users = loadUsers();
@@ -105,12 +104,8 @@ app.post('/api/char/select-job', (req, res) => {
     
     saveUsers(users);
     
-    // 프론트엔드 코드에 맞게 둘 중 어떤 데이터를 참조해도 화면이 정상 동작하도록 모두 반환합니다.
-    res.json({ 
-        success: true, 
-        character: user.character,
-        user: user 
-    });
+    // 프론트엔드가 오직 character 오브젝트만 정상적으로 읽도록 수정
+    res.json({ success: true, character: user.character });
 });
 
 // 4. 전투 보상 지급 API (보스 및 레이드)
