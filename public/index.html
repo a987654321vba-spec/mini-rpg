@@ -65,6 +65,8 @@
         }
         .pad-btn:active { background: #e0e0e0; }
         .pad-attack { background: var(--accent) !important; color: white; border-color: var(--accent); }
+
+        .shop-table td { padding: 6px 4px; }
     </style>
 </head>
 <body>
@@ -76,11 +78,11 @@
         <!-- 로그인 페이지 -->
         <div id="page-auth" class="page active">
             <div class="card">
-                <h3 style="margin-bottom:15px; text-align:center;">모험가 인증</h3>
-                <div class="input-group"><input type="text" id="auth-id" placeholder="아이디" value="test"></div>
-                <div class="input-group"><input type="password" id="auth-pw" placeholder="비밀번호" value="test"></div>
-                <div class="input-group"><input type="text" id="auth-nick" placeholder="닉네임" value="용사"></div>
-                <button class="btn" style="background:#42b883;" onclick="game.login()">로그인 및 시작</button>
+                <h3 style="margin-bottom:15px; text-align:center;">모험가 로그인</h3>
+                <div class="input-group"><input type="text" id="auth-id" placeholder="아이디"></div>
+                <div class="input-group"><input type="password" id="auth-pw" placeholder="비밀번호"></div>
+                <div class="input-group"><input type="text" id="auth-nick" placeholder="닉네임"></div>
+                <button class="btn" style="background:#42b883;" onclick="game.login()">로그인 및 모험 시작</button>
             </div>
         </div>
 
@@ -115,7 +117,7 @@
                 </div>
 
                 <div style="margin-top:15px; font-size: 0.9rem; line-height:1.6;">
-                    <div>🎯 <b>레벨:</b> <span id="lobby-level">1</span> (40레벨 전직 시 고유보수 2배!)</div>
+                    <div>🎯 <b>레벨:</b> <span id="lobby-level">1</span> / 70 (Max)</div>
                     <div>✨ <b>경험치:</b> <span id="lobby-exp">0</span> / <span id="lobby-next-exp">100</span></div>
                     <div>💰 <b>보유 재화:</b> <span id="lobby-gold" style="color:green; font-weight:bold;">0</span> G</div>
                 </div>
@@ -136,7 +138,6 @@
                     <div id="final-stats-display" style="margin-top:4px; color:#555; display:grid; grid-template-columns: 1fr 1fr; gap:4px;"></div>
                 </div>
             </div>
-            <button class="btn" style="background:#4a4a4a;" onclick="game.cheatLevelUp()">개발자 테스트: 레벨 +40 (2nd 전직 수치 체감)</button>
         </div>
 
         <!-- ② 전투 페이지 -->
@@ -153,13 +154,14 @@
                 
                 <div class="card">
                     <h4>🤝 친구 협동 레이드전</h4>
+                    <p style="font-size:0.75rem; color:crimson; margin-bottom:8px;">* 수락된 친구가 1명 이상 있어야만 입장할 수 있습니다.</p>
                     <div class="card" style="background:#fff3f3; margin-top:5px; padding:10px;">
                         <strong>레이드 보스 [난이도 하]</strong><br><small>기본 보상이 지급됩니다.</small>
-                        <button class="btn" style="background:var(--accent); padding:6px;" onclick="game.prepareActionBattle('raid', 'low')">입장</button>
+                        <button class="btn" style="background:var(--accent); padding:6px;" onclick="game.prepareActionBattle('raid', 'low')">친구와 입장</button>
                     </div>
                     <div class="card" style="background:#f3e8ff; margin-top:5px; padding:10px;">
                         <strong>레이드 보스 [난이도 상] <span style="color:red;">(3배 보상!)</span></strong><br><small>대량의 재화와 경험치 수급처</small>
-                        <button class="btn" style="background:#9b5de5; padding:6px;" onclick="game.prepareActionBattle('raid', 'high')">입장</button>
+                        <button class="btn" style="background:#9b5de5; padding:6px;" onclick="game.prepareActionBattle('raid', 'high')">친구와 입장</button>
                     </div>
                 </div>
             </div>
@@ -177,25 +179,46 @@
             </div>
         </div>
 
-        <!-- ③ 상점 페이지 (가격 3배 적용) -->
+        <!-- ③ 상점 페이지 -->
         <div id="page-shop" class="page">
             <div class="card">
-                <h4>🐷 펫 분양 (각 500 G)</h4>
+                <h4>🐷 펫 분양 (각 2,000 G)</h4>
+                <p style="font-size:0.75rem; color:crimson; margin-bottom:5px;">* 펫은 단 한 마리만 선택하여 보유할 수 있습니다! (구매 시 기존 펫 교체)</p>
                 <div style="display:flex; gap:10px; margin-top:10px;">
                     <button class="btn" style="background:#ffb8b8;" onclick="game.buyPet('돼지')">돼지 분양</button>
                     <button class="btn" style="background:#b8e9ff; color:#333;" onclick="game.buyPet('새')">새 분양</button>
                 </div>
-                <div style="margin-top:8px; font-size:0.85rem; color:#666;">보유 펫: <span id="shop-owned-pets">없음</span></div>
+                <div style="margin-top:8px; font-size:0.85rem; color:#666;">현재 동행 중인 펫: <span id="shop-owned-pets" style="color:var(--secondary); font-weight:bold;">없음</span></div>
             </div>
+            
             <div class="card">
-                <h4>⚔️ 능력치 업 장비 아이템 구매 (밸런스 패치 가격)</h4>
-                <table style="text-align:left;">
-                    <tr><td>신발 (속도 +5)</td><td>900G</td><td><button onclick="game.buyItem('shoes', 900)">구매</button></td></tr>
-                    <tr><td>갑옷 (체력 +50)</td><td>1200G</td><td><button onclick="game.buyItem('armor', 1200)">구매</button></td></tr>
-                    <tr><td>무기 (공격 +10)</td><td>1500G</td><td><button onclick="game.buyItem('weapon', 1500)">구매</button></td></tr>
-                    <tr><td>반지 (마력 +10)</td><td>1500G</td><td><button onclick="game.buyItem('ring', 1500)">구매</button></td></tr>
+                <h4>⚔️ 장비 상점 (상/중/하 등급 세분화)</h4>
+                <table class="shop-table" style="text-align:left;">
+                    <thead>
+                        <tr style="background:#eee;"><th colspan="4" style="background:#ddd; color:#333;">[상] 버전 장비 (3배 가격 / 최대 효율)</th></tr>
+                    </thead>
+                    <tr><td>신발[상] (속도+1.5)</td><td>2700G</td><td><button onclick="game.buyItem('shoes_high', 2700)">구매</button></td></tr>
+                    <tr><td>갑옷[상] (체력+150)</td><td>3600G</td><td><button onclick="game.buyItem('armor_high', 3600)">구매</button></td></tr>
+                    <tr><td>무기[상] (공격+30)</td><td>4500G</td><td><button onclick="game.buyItem('weapon_high', 4500)">구매</button></td></tr>
+                    <tr><td>반지[상] (마력+30)</td><td>4500G</td><td><button onclick="game.buyItem('ring_high', 4500)">구매</button></td></tr>
+                    
+                    <thead>
+                        <tr style="background:#eee;"><th colspan="4" style="background:#ddd; color:#333;">[중] 버전 장비 (2배 가격 / 중간 효율)</th></tr>
+                    </thead>
+                    <tr><td>신발[중] (속도+1.0)</td><td>1800G</td><td><button onclick="game.buyItem('shoes_mid', 1800)">구매</button></td></tr>
+                    <tr><td>갑옷[중] (체력+100)</td><td>2400G</td><td><button onclick="game.buyItem('armor_mid', 2400)">구매</button></td></tr>
+                    <tr><td>무기[중] (공격+20)</td><td>3000G</td><td><button onclick="game.buyItem('weapon_mid', 3000)">구매</button></td></tr>
+                    <tr><td>반지[중] (마력+20)</td><td>3000G</td><td><button onclick="game.buyItem('ring_mid', 3000)">구매</button></td></tr>
+
+                    <thead>
+                        <tr style="background:#eee;"><th colspan="4" style="background:#ddd; color:#333;">[하] 버전 장비 (1배 가격 / 기본 효율)</th></tr>
+                    </thead>
+                    <tr><td>신발[하] (속도+0.5)</td><td>900G</td><td><button onclick="game.buyItem('shoes_low', 900)">구매</button></td></tr>
+                    <tr><td>갑옷[하] (체력+50)</td><td>1200G</td><td><button onclick="game.buyItem('armor_low', 1200)">구매</button></td></tr>
+                    <tr><td>무기[하] (공격+10)</td><td>1500G</td><td><button onclick="game.buyItem('weapon_low', 1500)">구매</button></td></tr>
+                    <tr><td>반지[하] (마력+10)</td><td>1500G</td><td><button onclick="game.buyItem('ring_low', 1500)">구매</button></td></tr>
                 </table>
-                <div style="margin-top:10px; font-size:0.85rem; color:#555;">보유 장비: <span id="shop-owned-items">없음</span></div>
+                <div style="margin-top:10px; font-size:0.85rem; color:#555; word-break:break-all;">보유 장비: <span id="shop-owned-items">없음</span></div>
             </div>
         </div>
 
@@ -208,7 +231,7 @@
             </div>
             <div class="card" style="text-align:center;">
                 <h4 id="upgrade-title">캐릭터 능력치 강화</h4>
-                <p style="margin:15px 0; font-size:1.1rem;">현재 강화 단계: <strong id="upgrade-level-val" style="color:red;">0</strong> / 5 강</p>
+                <p style="margin:15px 0; font-size:1.1rem;">현재 강화 단계: <strong id="upgrade-level-val" style="color:red;">0</strong> / 10 강</p>
                 <p style="font-size:0.85rem; color:#777; margin-bottom:10px;" id="upgrade-info">다음 강화 확률: 100%</p>
                 <button class="btn" onclick="game.executeUpgrade()">강화 시도하기</button>
                 <button class="btn" style="background:#95a5a6; margin-top:5px; font-size:0.8rem; padding:5px;" onclick="game.resetCharacterStats()">캐릭터 스탯 초기화 (100G)</button>
@@ -218,17 +241,30 @@
         <!-- ⑤ 친구 페이지 -->
         <div id="page-friends" class="page">
             <div class="card">
-                <h4>🔍 친구 ID 추가</h4>
+                <h4>🔍 친구 ID 추가 요청</h4>
                 <div class="input-group" style="margin-top:10px;">
-                    <input type="text" id="friend-search-id" placeholder="친구 아이디">
-                    <button class="btn" style="margin:0; width:70px;" onclick="game.addFriend()">요청</button>
+                    <input type="text" id="friend-search-id" placeholder="친구 아이디 입력">
+                    <button class="btn" style="margin:0; width:70px;" onclick="game.sendFriendRequest()">요청</button>
                 </div>
             </div>
+            
+            <div class="card" style="border-color:#ffbd59;">
+                <h4>📩 받은 친구 요청 (수락 대기)</h4>
+                <table>
+                    <thead><tr><th>아이디</th><th>상태</th></tr></thead>
+                    <tbody id="friend-request-body">
+                        <tr><td colspan="2" style="color:#aaa;">받은 요청이 없습니다.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="card">
-                <h4>👥 내 친구 목록</h4>
+                <h4>👥 내 친구 목록 (수락 완료됨)</h4>
                 <table>
                     <thead><tr><th>닉네임</th><th>레벨</th></tr></thead>
-                    <tbody id="friend-table-body"></tbody>
+                    <tbody id="friend-table-body">
+                        <tr><td colspan="2" style="color:#aaa;">서버에 등록된 친구가 없습니다.</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -236,10 +272,12 @@
         <!-- ⑥ 랭킹 페이지 -->
         <div id="page-ranking" class="page">
             <div class="card">
-                <h4>🏆 전 서버 통합 TOP 10 랭킹</h4>
+                <h4>🏆 전 서버 실시간 TOP 랭킹 보드</h4>
                 <table>
                     <thead><tr><th>순위</th><th>닉네임</th><th>직업</th><th>레벨</th></tr></thead>
-                    <tbody id="ranking-table-body"></tbody>
+                    <tbody id="ranking-table-body">
+                        <tr><td colspan="4" style="color:#aaa; text-align:center;">랭킹 정보를 불러오는 중입니다.</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -268,6 +306,9 @@
             this.keys = { left: false, right: false };
             this.playerImg = new Image();
             
+            // 10레벨 강화 확률 테이블 설정 (0강->1강 확률이 인덱스 0)
+            this.upgradeProbs = [100, 83, 64, 51, 26, 14, 7, 4, 2]; 
+
             this.initBattleStages();
             this.initMobileTouchControls();
         }
@@ -299,18 +340,26 @@
         }
 
         login() {
+            const userId = document.getElementById('auth-id').value.trim();
+            const userNick = document.getElementById('auth-nick').value.trim();
+            
+            if(!userId || !userNick) {
+                alert("아이디와 닉네임을 정확히 입력해주세요!");
+                return;
+            }
+
             this.user = {
-                id: document.getElementById('auth-id').value || "test",
-                nickname: document.getElementById('auth-nick').value || "모험가",
+                id: userId,
+                nickname: userNick,
                 character: {
-                    job: '', level: 1, exp: 0, 
-                    gold: 100, // 패치: 100골드로 스타트 축소
+                    job: '', level: 1, exp: 0, gold: 100,
                     statPoints: 10,
-                    stats: { speed: 1, hp: 1, atk: 1, magic: 1 }, // 패치: 모두 1로 스타트
+                    stats: { speed: 1, hp: 1, atk: 1, magic: 1 },
                     upgrades: { char: 0, item: 0, pet: 0 },
-                    pets: [], items: []
+                    pets: [], items: [] // 단 한 마리만 허용하지만 데이터 일관성을 위해 배열 처리 (or 문자열)
                 },
-                friends: [{ nickname: "키리토", level: 50 }]
+                friendRequests: [],
+                friends: []
             };
             document.getElementById('page-auth').classList.remove('active');
             document.getElementById('main-nav').style.display = 'flex';
@@ -323,41 +372,36 @@
             this.switchTab('lobby');
         }
 
-        // 실시간 복합 연동 능력치 계산기 엔진
         calculateFinalCombatStats() {
             if(!this.user) return null;
             const char = this.user.character;
             const job = char.job;
             const is2nd = char.level >= 40;
 
-            // 1. 기본 베이스 스탯 수치 정의
             let baseHp = 100;
             let baseSpeed = 4.0;
             let baseAtk = 10;
             let baseMagic = 10;
 
-            // 2. 직업별 스탯 가중치 및 기본 체력/속도 서열 보정 규칙
-            let hpGainPerStat = 15; // 사령술사 기본값
-            let speedGainPerStat = 0.15; // 마검사 기본값
+            let hpGainPerStat = 15;
+            let speedGainPerStat = 0.15;
 
             if(job === '성기사') {
-                baseHp = 200; baseSpeed = 3.2; // 성기사 > 마검사 > 사령술사 체력서열 고정
+                baseHp = 200; baseSpeed = 3.2;
                 hpGainPerStat = 30; speedGainPerStat = 0.1;
             } else if(job === '마검사') {
                 baseHp = 150; baseSpeed = 4.0;
                 hpGainPerStat = 20; speedGainPerStat = 0.15;
             } else if(job === '사령술사') {
-                baseHp = 100; baseSpeed = 4.8; // 사령술사 > 마검사 > 성기사 속도서열 고정
+                baseHp = 100; baseSpeed = 4.8;
                 hpGainPerStat = 15; speedGainPerStat = 0.2;
             }
 
-            // 스탯 찍을 때 비례해서 증가하는 실제 값 연산
             let finalHp = baseHp + (char.stats.hp * hpGainPerStat);
             let finalSpeed = baseSpeed + (char.stats.speed * speedGainPerStat);
             let finalAtk = baseAtk + (char.stats.atk * 2);
             let finalMagic = baseMagic + (char.stats.magic * 2);
 
-            // 3. 전직 고유 보너스 및 2차전직 2배 부스팅 규칙 연동
             if(job === '성기사') {
                 finalAtk += is2nd ? 60 : 30;
             } else if(job === '사령술사') {
@@ -367,17 +411,28 @@
                 finalMagic += is2nd ? 30 : 15;
             }
 
-            // 4. 장비 추가 스탯 마운트
+            // 상/중/하 아이템 능력치 매핑 적용
             char.items.forEach(item => {
-                if(item === 'shoes') finalSpeed += 0.5;
-                if(item === 'armor') finalHp += 50;
-                if(item === 'weapon') finalAtk += 10;
-                if(item === 'ring') finalMagic += 10;
+                if(item === 'shoes_high') finalSpeed += 1.5;
+                if(item === 'shoes_mid') finalSpeed += 1.0;
+                if(item === 'shoes_low') finalSpeed += 0.5;
+
+                if(item === 'armor_high') finalHp += 150;
+                if(item === 'armor_mid') finalHp += 100;
+                if(item === 'armor_low') finalHp += 50;
+
+                if(item === 'weapon_high') finalAtk += 30;
+                if(item === 'weapon_mid') finalAtk += 20;
+                if(item === 'weapon_low') finalAtk += 10;
+
+                if(item === 'ring_high') finalMagic += 30;
+                if(item === 'ring_mid') finalMagic += 20;
+                if(item === 'ring_low') finalMagic += 10;
             });
 
-            // 5. 강화 수치 추가 보정
-            finalHp += char.upgrades.char * 100;
-            finalAtk += char.upgrades.item * 15;
+            // 10강 확장 밸런스 가산 수식
+            finalHp += char.upgrades.char * 120;
+            finalAtk += char.upgrades.item * 20;
 
             return { hp: Math.floor(finalHp), speed: parseFloat(finalSpeed.toFixed(2)), atk: Math.floor(finalAtk), magic: Math.floor(finalMagic) };
         }
@@ -396,13 +451,11 @@
             document.getElementById('lobby-gold').innerText = char.gold;
             document.getElementById('lobby-points').innerText = `(포인트: ${char.statPoints})`;
             
-            // 순수 투자량 표기
             document.getElementById('stat-speed').innerText = char.stats.speed;
             document.getElementById('stat-hp').innerText = char.stats.hp;
             document.getElementById('stat-atk').innerText = char.stats.atk;
             document.getElementById('stat-magic').innerText = char.stats.magic;
 
-            // 실시간 연동 전투 최종치 출력
             const final = this.calculateFinalCombatStats();
             const displayDiv = document.getElementById('final-stats-display');
             if(final) {
@@ -418,8 +471,17 @@
             document.getElementById('player-sprite').src = imgPath;
             this.playerImg.src = imgPath;
 
-            document.getElementById('shop-owned-pets').innerText = char.pets.length > 0 ? char.pets.join(', ') : '없음';
-            document.getElementById('shop-owned-items').innerText = char.items.length > 0 ? char.items.join(', ') : '없음';
+            // 단 한 마리만 노출되도록 렌더링 변경
+            document.getElementById('shop-owned-pets').innerText = char.pets.length > 0 ? char.pets[0] : '없음';
+            
+            // 장비 매핑명 가독성 개선 출력
+            const formatItems = char.items.map(i => {
+                return i.replace('shoes_high','신발[상]').replace('shoes_mid','신발[중]').replace('shoes_low','신발[하]')
+                        .replace('armor_high','갑옷[상]').replace('armor_mid','갑옷[중]').replace('armor_low','갑옷[하]')
+                        .replace('weapon_high','무기[상]').replace('weapon_mid','무기[중]').replace('weapon_low','무기[하]')
+                        .replace('ring_high','반지[상]').replace('ring_mid','반지[중]').replace('ring_low','반지[하]');
+            });
+            document.getElementById('shop-owned-items').innerText = formatItems.length > 0 ? formatItems.join(', ') : '없음';
             this.updateUpgradeUI();
             this.updateFriendListUI();
         }
@@ -427,20 +489,21 @@
         addStat(type) {
             const char = this.user.character;
             if(char.statPoints <= 0) return alert("분배할 포인트가 없습니다.");
-            if(char.stats[type] >= 80) return alert("한 스탯당 최대 80까지만 투자할 수 있습니다!"); // 패치: 맥스 80 제한 규칙 추가
+            if(char.stats[type] >= 80) return alert("한 스탯당 최대 80까지만 투자할 수 있습니다!");
 
             char.statPoints--;
             char.stats[type]++;
             this.updateLobbyUI();
         }
 
-        cheatLevelUp() {
-            this.user.character.level += 40;
-            alert("테스트 완료: 레벨 40 돌파! 전직 보너스 수치가 2배로 상승하고 2nd 외형이 연동됩니다.");
-            this.updateLobbyUI();
-        }
-
         prepareActionBattle(type, difficulty = '') {
+            if(type === 'raid') {
+                if(!this.user.friends || this.user.friends.length === 0) {
+                    alert("⚠️ 레이드는 협동 컨텐츠입니다. 수락 완료된 친구가 최소 1명 이상 존재해야 입장할 수 있습니다!");
+                    return;
+                }
+            }
+
             document.getElementById('battle-setup').style.display = 'none';
             document.getElementById('canvas-container').style.display = 'block';
 
@@ -453,7 +516,6 @@
             let goldReward = type === 'boss' ? stage * 150 : (difficulty === 'high' ? 1800 : 600);
             let expReward = type === 'boss' ? stage * 100 : (difficulty === 'high' ? 1500 : 500);
 
-            // 실시간 밸런싱이 끝난 최종 스탯 추출 후 로드
             const final = this.calculateFinalCombatStats();
 
             this.gameObject = {
@@ -550,17 +612,26 @@
                 alert(`전투 승리! [골드 +${this.gameObject.rewards.gold} G / 경험치 +${this.gameObject.rewards.exp} 획득]`);
                 this.checkLevelUp();
             } else {
-                alert("보스 공략에 실패했습니다. 상점 이용 또는 스탯 분배를 적극 검토하세요!");
+                alert("공략에 실패했습니다.");
             }
             this.exitBattle();
         }
 
         checkLevelUp() {
             let char = this.user.character;
+            if(char.level >= 70) return;
+
             let nextExp = Math.floor(100 * Math.pow(char.level, 1.5));
             if(char.exp >= nextExp) {
-                char.exp -= nextExp; char.level++; char.statPoints += 5;
-                alert(`🎉 레벨 업! 현재 레벨 ${char.level} (보너스 스탯 포인트 +5 지급)`);
+                char.exp -= nextExp;
+                char.level++;
+                char.statPoints += 4;
+                alert(`🎉 레벨 업! 현재 레벨 ${char.level} (보너스 스탯 포인트 +4 지급)`);
+                
+                if(char.level >= 70) {
+                    char.level = 70;
+                    alert("🏆 최고 레벨인 70레벨에 도달하셨습니다!");
+                }
             }
         }
 
@@ -572,10 +643,13 @@
         }
 
         buyPet(name) {
-            if(this.user.character.gold < 500) return alert("재화(골드)가 부족합니다.");
-            this.user.character.gold -= 500;
-            this.user.character.pets.push(name);
-            alert(`${name} 분양이 완료되었습니다!`);
+            // 패치: 펫 가격 4배 인상 (2000골드)
+            if(this.user.character.gold < 2000) return alert("재화(골드)가 부족합니다. (분양가: 2,000G)");
+            
+            this.user.character.gold -= 2000;
+            // 패치: 단 하나만 선택 보유 가능 기믹 (기존 목록 비우고 하나만 추가)
+            this.user.character.pets = [name];
+            alert(`[${name}] 분양이 완료되었습니다! 이제부터 동행합니다.`);
             this.updateLobbyUI();
         }
 
@@ -583,7 +657,7 @@
             if(this.user.character.gold < price) return alert("재화(골드)가 부족합니다.");
             this.user.character.gold -= price;
             this.user.character.items.push(code);
-            alert("장비를 장착했습니다! 전투 능력치가 수치형으로 영구 보정됩니다.");
+            alert("장비를 장착했습니다!");
             this.updateLobbyUI();
         }
 
@@ -599,27 +673,28 @@
             const currentLv = this.user.character.upgrades[this.currentUpgradeTab];
             document.getElementById('upgrade-level-val').innerText = currentLv;
 
-            if(currentLv >= 5) {
-                document.getElementById('upgrade-info').innerText = "최대 강화 단계에 도달했습니다.";
+            // 패치: 최대 10레벨까지 강화 가능
+            if(currentLv >= 10) {
+                document.getElementById('upgrade-info').innerText = "최대 강화 단계에 도달했습니다. (👑 10강 마스터)";
             } else {
-                const probs = [100, 80, 60, 40, 20];
+                const prob = this.upgradeProbs[currentLv];
                 const cost = (currentLv + 1) * 200;
-                document.getElementById('upgrade-info').innerText = `다음 강화 확률: ${probs[currentLv]}% (소모 골드: ${cost} G)`;
+                document.getElementById('upgrade-info').innerText = `다음 강화 확률: ${prob}% (소모 골드: ${cost} G)`;
             }
         }
 
         executeUpgrade() {
             let currentLv = this.user.character.upgrades[this.currentUpgradeTab];
-            if(currentLv >= 5) return alert("더 이상 강화할 수 없습니다 (최대 5강 제한)");
+            if(currentLv >= 10) return alert("더 이상 강화할 수 없습니다 (최대 10강 제한)");
 
             const cost = (currentLv + 1) * 200;
             if(this.user.character.gold < cost) return alert("강화 비용이 부족합니다.");
 
             this.user.character.gold -= cost;
-            const probs = [100, 80, 60, 40, 20];
+            const prob = this.upgradeProbs[currentLv];
             const rand = Math.random() * 100;
 
-            if(rand <= probs[currentLv]) {
+            if(rand <= prob) {
                 this.user.character.upgrades[this.currentUpgradeTab]++;
                 alert(`✨ 강화 성공! 현재 [${this.user.character.upgrades[this.currentUpgradeTab]} 강] 입니다.`);
             } else {
@@ -631,23 +706,50 @@
         resetCharacterStats() {
             if(this.user.character.gold < 100) return alert("초기화 비용이 부족합니다.");
             this.user.character.gold -= 100;
-            this.user.character.statPoints = 10 + (this.user.character.level - 1) * 5;
-            this.user.character.stats = { speed: 1, hp: 1, atk: 1, magic: 1 }; // 패치 적용 리셋
-            alert("모든 투자 스탯이 1로 리셋되었으며 포인트가 온전히 환원되었습니다.");
+            this.user.character.statPoints = 10 + (this.user.character.level - 1) * 4;
+            this.user.character.stats = { speed: 1, hp: 1, atk: 1, magic: 1 };
+            alert("모든 투자 스탯이 1로 리셋되었으며 포인트가 반환되었습니다.");
             this.updateLobbyUI();
         }
 
-        addFriend() {
-            const id = document.getElementById('friend-search-id').value.trim();
-            if(!id) return alert("아이디를 적어주세요.");
-            this.user.friends.push({ nickname: `친구_${id}`, level: Math.floor(Math.random() * 30) + 1 });
+        sendFriendRequest() {
+            const targetId = document.getElementById('friend-search-id').value.trim();
+            if(!targetId) return alert("요청할 유저 아이디를 적어주세요.");
+            if(targetId === this.user.id) return alert("본인에게는 요청할 수 없습니다.");
+            
+            this.user.friendRequests.push(targetId);
             document.getElementById('friend-search-id').value = '';
-            this.updateLobbyUI();
+            alert(`[${targetId}] 유저에게 친구 요청을 보냈습니다. 상대방 수락 대기 상태가 됩니다.`);
+            this.updateFriendListUI();
+        }
+
+        acceptFriend(requestId) {
+            this.user.friendRequests = this.user.friendRequests.filter(id => id !== requestId);
+            this.user.friends.push({ nickname: `유저_${requestId}`, level: Math.floor(Math.random() * 20) + 10 });
+            alert(`[${requestId}]님의 친구 요청을 수락하여 정식 친구가 되었습니다!`);
+            this.updateFriendListUI();
         }
 
         updateFriendListUI() {
+            const reqBody = document.getElementById('friend-request-body');
+            reqBody.innerHTML = '';
+            if(this.user.friendRequests.length === 0) {
+                reqBody.innerHTML = '<tr><td colspan="2" style="color:#aaa;">받은 요청이 없습니다.</td></tr>';
+            } else {
+                this.user.friendRequests.forEach(reqId => {
+                    reqBody.innerHTML += `<tr>
+                        <td>${reqId}</td>
+                        <td><button style="padding:2px 8px; background:#42b883; color:white; border:none; border-radius:4px;" onclick="game.acceptFriend('${reqId}')">수락</button></td>
+                    </tr>`;
+                });
+            }
+
             const tbody = document.getElementById('friend-table-body');
             tbody.innerHTML = '';
+            if(this.user.friends.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="color:#aaa;">수락 완료된 정식 친구가 없습니다.</td></tr>';
+                return;
+            }
             this.user.friends.forEach(f => {
                 tbody.innerHTML += `<tr><td>${f.nickname}</td><td>Lv.${f.level}</td></tr>`;
             });
@@ -656,18 +758,21 @@
         renderRanking() {
             const tbody = document.getElementById('ranking-table-body');
             tbody.innerHTML = '';
-            let rankers = [
-                { nickname: "키리토", job: "마검사", level: 68 },
-                { nickname: "아서", job: "성기사", level: 62 },
-                { nickname: "리치왕", job: "사령술사", level: 59 },
-                { nickname: "클라인", job: "성기사", level: 32 }
-            ];
+            
+            let rankers = [];
             if(this.user) {
                 rankers.push({ nickname: this.user.nickname, job: this.user.character.job || "무직", level: this.user.character.level });
             }
-            rankers.sort((a, b) => b.level - a.level).slice(0, 10).forEach((r, idx) => {
-                let style = r.nickname === this.user?.nickname ? "style='background:#fff3cd; font-weight:bold;'" : "";
-                tbody.innerHTML += `<tr ${style}><td>${idx + 1}위</td><td>${r.nickname}</td><td>${r.job}</td><td>Lv.${r.level}</td></tr>`;
+
+            rankers.sort((a, b) => b.level - a.level);
+
+            rankers.forEach((r, idx) => {
+                tbody.innerHTML += `<tr style='background:#fff3cd; font-weight:bold;'>
+                    <td>${idx + 1}위</td>
+                    <td>${r.nickname} (나)</td>
+                    <td>${r.job}</td>
+                    <td>Lv.${r.level}</td>
+                </tr>`;
             });
         }
 
@@ -676,6 +781,10 @@
             document.getElementById('main-nav').style.display = 'none';
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-auth').classList.add('active');
+            document.getElementById('auth-id').value = '';
+            document.getElementById('auth-pw').value = '';
+            document.getElementById('auth-nick').value = '';
+            alert("로그아웃 되었습니다.");
         }
     }
 
